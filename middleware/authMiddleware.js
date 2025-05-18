@@ -64,7 +64,7 @@ export const isStudent = (req, res, next) => {
 };
 
 export const isProfessor = (req, res, next) => {
-  if (req.user.role !== 'teacher') return res.status(403).json({ message: 'Access denied' });
+  if (req.user.role !== 'professor') return res.status(403).json({ message: 'Access denied' });
   next();
 };
 

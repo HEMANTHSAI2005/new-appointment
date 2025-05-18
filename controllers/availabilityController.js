@@ -1,16 +1,16 @@
-import Availability from '../models/Availability.js';
+import Availabilitynew from '../models/Availabilitynew.js';
 
 export const addAvailability = async (req, res) => {
   try {
-    const professorId = req.user.userId;
+    const userId = req.user.userId; // professor // warden
     const { slots } = req.body;
 
-    let availability = await Availability.findOne({ professor: professorId });
+    let availability = await Availabilitynew.findOne({ user: userId });
 
     if (availability) {
-      availability.slots = [...new Set([...availability.slots, ...slots])]; 
+      availability.slots = [...new Set([...availability.slots, ...slots])];
     } else {
-      availability = new Availability({ professor: professorId, slots });
+      availability = new Availabilitynew({ user: userId, slots });
     }
 
     await availability.save();
@@ -23,8 +23,10 @@ export const addAvailability = async (req, res) => {
 export const getProfessorAvailability = async (req, res) => {
   try {
     const { professorId } = req.params;
-    const availability = await Availability.findOne({ professor: professorId }).populate('professor', 'name email');;;
+    console.log("pid: ",professorId)
+    const availability = await Availabilitynew.findOne({ user: professorId });
 
+    console.log("av: ",availability)
     if (!availability) {
       return res.status(404).json({ message: 'No availability found' });
     }

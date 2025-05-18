@@ -4,8 +4,9 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  role: { type: String, enum: ['student', 'teacher', 'warden'], required: true },
-}, { timestamps: true });
+  role: { type: String, enum: ['student', 'professor', 'warden'], required: true },
+  hostel: { type: String }, //this one is optional field
+});
 
-const User = mongoose.model('Usernew', userSchema);
-export default User;
+export default mongoose.model('Usernew', userSchema);
+ 

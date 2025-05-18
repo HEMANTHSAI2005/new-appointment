@@ -1,9 +1,5 @@
 import express from 'express';
-import {
-  setWardenAvailability,
-  bookWardenAppointment,
-  getWardenAppointments
-} from '../controllers/wardenController.js';
+import { setWardenAvailability, bookWardenAppointment, getWardenAppointments } from '../controllers/wardenController.js';
 
 import { verifyToken, isWarden } from '../middleware/authMiddleware.js';
 

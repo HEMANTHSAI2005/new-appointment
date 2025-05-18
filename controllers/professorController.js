@@ -1,11 +1,11 @@
-import Appointment from '../models/Appointment.js';
-import Availability from '../models/Availability.js';
+import Appointmentnew from '../models/Appointmentnew.js';
+import Availabilitynew from '../models/Availabilitynew.js';
 
 export const getProfessorAppointments = async (req, res) => {
   try {
     const professorId = req.user.userId;
 
-    const appointments = await Appointment.find({ professor: professorId }).populate('student', 'name email').populate('professor', 'name');
+    const appointments = await Appointmentnew.find({ professor: professorId }).populate('student', 'name email').populate('professor', 'name');
 
     res.status(200).json(appointments);
   } catch (error) {
@@ -19,7 +19,9 @@ export const updateAppointmentStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const appointment = await Appointment.findById(id).populate('student', 'name email').populate('professor', 'name email');
+    console.log("id: ",id)
+
+    const appointment = await Appointmentnew.findById(id).populate('student', 'name email').populate('professor', 'name email');
     if (!appointment) return res.status(404).json({ message: 'Appointment not found' });
 
     appointment.status = status;
@@ -27,7 +29,7 @@ export const updateAppointmentStatus = async (req, res) => {
 
     if (status === 'cancelled') {
       // Re-add time to professor's availability
-      const availability = await Availability.findOne({ professor: appointment.professor });
+      const availability = await Availabilitynew.findOne({ professor: appointment.professor });
       if (availability && !availability.slots.includes(appointment.time)) {
         availability.slots.push(appointment.time);
         await availability.save();

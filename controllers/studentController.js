@@ -1,7 +1,6 @@
-import Appointment from '../models/Appointment.js';
-import Availability from '../models/Availability.js';
-import User from '../models/User.js';
-
+import Availabilitynew from '../models/Availabilitynew.js';
+import Appointmentnew from '../models/Appointmentnew.js';
+import Usernew from '../models/Usernew.js';
 
 export const bookAppointment = async (req, res) => {
   try {
@@ -9,17 +8,17 @@ export const bookAppointment = async (req, res) => {
     const studentId = req.user.userId;
 
     // Find professor by email
-    const professor = await User.findOne({ email: professorEmail, role: 'teacher' });
+    const professor = await Usernew.findOne({ email: professorEmail, role: 'professor' });
     if (!professor) {
       return res.status(404).json({ message: 'Professor not found' });
     }
 
-    const availability = await Availability.findOne({ professor: professor._id });
+    const availability = await Availabilitynew.findOne({ user: professor._id });
     if (!availability || !availability.slots.includes(time)) {
       return res.status(400).json({ message: 'Selected time not available' });
     }
 
-    const appointment = await Appointment.create({
+    const appointment = await Appointmentnew.create({
       professor: professor._id,
       student: studentId,
       time,
@@ -29,7 +28,7 @@ export const bookAppointment = async (req, res) => {
     availability.slots = availability.slots.filter(slot => slot !== time);
     await availability.save();
 
-    const populatedAppointment = await Appointment.findById(appointment._id)
+    const populatedAppointment = await Appointmentnew.findById(appointment._id)
       .populate('professor', 'name email')
       .populate('student', 'name email');
 
@@ -45,7 +44,7 @@ export const getStudentAppointments = async (req, res) => {
 
     const studentId = req.user.userId;
 
-    const appointments = await Appointment.find({ student: studentId }).populate('professor', 'name email');
+    const appointments = await Appointmentnew.find({ student: studentId }).populate('professor', 'name email');
 
     res.status(200).json(appointments);
   } catch (error) {
@@ -59,7 +58,7 @@ export const getBookedAppointments = async (req, res) => {
     console.log('HIT: getBookedAppointments');
     const studentId = req.user.userId;
 
-    const appointments = await Appointment.find({ 
+    const appointments = await Appointmentnew.find({ 
       student: studentId, 
       status: 'booked' 
     }).populate('professor', 'name email').populate('student', 'name email');
@@ -78,7 +77,7 @@ export const getCancelledAppointments = async (req, res) => {
 
     const studentId = req.user.userId;
 
-    const appointments = await Appointment.find({
+    const appointments = await Appointmentnew.find({
       student: studentId,
       status: 'cancelled'
     }).populate('professor', 'name email');

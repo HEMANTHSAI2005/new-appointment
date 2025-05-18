@@ -2,9 +2,15 @@ import Availabilitynew from '../models/Availabilitynew.js';
 import Appointmentnew from '../models/Appointmentnew.js';
 import Usernew from '../models/Usernew.js';
 
+
 export const setWardenAvailability = async (req, res) => {
   try {
     const wardenId = req.user.userId;
+
+    if (req.user.role !== 'warden') {
+      return res.status(403).json({ message: 'Only wardens can set availability' });
+    }
+
     const { slots } = req.body;
     console.log(slots)
     let availability = await Availabilitynew.findOne({ user: wardenId });
@@ -31,8 +37,13 @@ export const bookWardenAppointment = async (req, res) => {
     console.log("time: ",time)
     const targetWarden = await Usernew.findOne({ email: wardenEmail, role: 'warden' });
     console.log("valu: ",targetWarden)
+
     if (!targetWarden) {
       return res.status(404).json({ message: 'Target warden not found' });
+    }
+
+    if (targetWarden.role !== 'warden') {
+      return res.status(403).json({ message: 'Only wardens can book appointments' });
     }
 
     const availability = await Availabilitynew.findOne({ user: targetWarden._id });
@@ -41,8 +52,8 @@ export const bookWardenAppointment = async (req, res) => {
     }
 
     const appointment = await Appointmentnew.create({
-      professor: targetWarden._id, 
-      student: bookingWardenId,    
+      warden1: bookingWardenId,
+      warden2: targetWarden._id,
       time,
       status: 'booked'
     });
@@ -51,8 +62,8 @@ export const bookWardenAppointment = async (req, res) => {
     await availability.save();
 
     const populated = await Appointmentnew.findById(appointment._id)
-      .populate('professor', 'name email')
-      .populate('student', 'name email');
+      .populate('warden1', 'name email')
+      .populate('warden2', 'name email');
 
     res.status(201).json({ message: 'Appointment booked', appointment: populated });
   } catch (error) {
@@ -65,9 +76,10 @@ export const getWardenAppointments = async (req, res) => {
     const wardenId = req.user.userId;
 
     const appointments = await Appointmentnew.find({
-      $or: [{ professor: wardenId }, { student: wardenId }]
-    }).populate('professor', 'name email')
-      .populate('student', 'name email');
+      $or: [{ warden1: wardenId }, { warden2: wardenId }]
+    })
+      .populate('warden1', 'name email')
+      .populate('warden2', 'name email');
 
     res.status(200).json(appointments);
   } catch (error) {
